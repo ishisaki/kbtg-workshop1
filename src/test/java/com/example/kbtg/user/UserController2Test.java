@@ -1,37 +1,36 @@
 package com.example.kbtg.user;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.*;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-public class UserControllerTest {
+public class UserController2Test {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Autowired
+    @MockBean
     private UserRepository userRepository;
-
-    @AfterEach
-    public void clearData() {
-        userRepository.deleteAll();
-    }
 
     @Test
     public void success_get_user_id_1() {
         // Arrange
         MyUser somkiat = new MyUser();
+        somkiat.setId(1);
         somkiat.setName("somkiat");
         somkiat.setAge(30);
-        userRepository.save(somkiat);
+        when(userRepository.findById(1)).thenReturn(Optional.of(somkiat));
         // Act
         UserResponse response
                 = restTemplate.getForObject("/user/1", UserResponse.class);
@@ -44,13 +43,5 @@ public class UserControllerTest {
         assertEquals(expected, response);
     }
 
-    @Test
-    public void user_not_found_with_user_id_15() {
-        // Act
-        ErrorResponse response = restTemplate.getForObject("/user/15", ErrorResponse.class);
-        // Assert
-        assertEquals(1234, response.getCode());
-        assertEquals("User not found id: 15", response.getMessage());
-    }
 
 }
